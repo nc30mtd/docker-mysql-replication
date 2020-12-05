@@ -1,0 +1,84 @@
+version: "3"
+services:
+  # MySQL
+  mysql-db-1:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    container_name: mysql-db-1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test-database-name
+      MYSQL_USER: test-database-name
+      MYSQL_PASSWORD: hogehoge
+      MYSQL_START_TIMEOUT: 1200000
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - ./database1/data:/var/lib/mysql
+      - ./database1/sql:/docker-entrypoint-initdb.d
+      - ./database1/log/mysql:/var/log/mysql
+      - ./opt1:/root/opt
+    ports:
+      - 3306:3306
+      - 221:22
+
+  # MySQL
+  mysql-db-2:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    container_name: mysql-db-2
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test-database-name
+      MYSQL_USER: test-database-name
+      MYSQL_PASSWORD: hogehoge
+      MYSQL_START_TIMEOUT: 1200000
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - ./database2/data:/var/lib/mysql
+      - ./database2/sql:/docker-entrypoint-initdb.d
+      - ./database2/log/mysql:/var/log/mysql
+      - ./opt2:/root/opt
+    ports:
+      - 3307:3306
+      - 222:22
+
+  # phpmyadmin1
+  phpmyadmin-1:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql-db-1
+      PMA_USER: test-database-name
+      PMA_PASSWORD: hogehoge
+      PMA_PORT: 3306
+    links:
+      - mysql-db-1
+    ports:
+      - 38080:80
+    volumes:
+      - ./phpMyAdmin1/sessions:/sessions
+    depends_on:
+      - mysql-db-1
+
+
+  # phpmyadmin2
+  phpmyadmin-2:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql-db-2
+      PMA_USER: test-database-name
+      PMA_PASSWORD: hogehoge
+      PMA_PORT: 3306
+    links:
+      - mysql-db-2
+    ports:
+      - 38081:80
+    volumes:
+      - ./phpMyAdmin2/sessions:/sessions
+    depends_on:
+      - mysql-db-2
